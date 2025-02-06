@@ -4,6 +4,7 @@ import lt.ca.javau11.gr.carservice.jwt.AuthTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -55,11 +56,12 @@ public class WebSecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/carservice/auth/**").permitAll()
-                                .requestMatchers("/carservice/user/**").hasAuthority("ROLE_ADMIN")
-                                .requestMatchers("/carservice/client/**").hasAuthority("ROLE_ADMIN")
-                                .requestMatchers("/carservice/test/**").authenticated()
+                .authorizeHttpRequests(auth -> auth
+                                .requestMatchers(HttpMethod.GET,"/carservice/auth/**").permitAll()
+                                .requestMatchers(HttpMethod.GET,"/carservice/user/**").permitAll()
+                                .requestMatchers(HttpMethod.GET,"/carservice/client/**").permitAll()
+                                .requestMatchers(HttpMethod.GET,"/carservice/vehicle/**").permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "/carservice/user/**").authenticated()
                                 .anyRequest().permitAll()
                 )
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
