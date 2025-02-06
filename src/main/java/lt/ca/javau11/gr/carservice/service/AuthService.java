@@ -101,7 +101,8 @@ public class AuthService {
         UserEntity user = new UserEntity(
                 signUpRequest.getUsername(),
                 encoder.encode(signUpRequest.getPassword()),
-                signUpRequest.getEmail());
+                signUpRequest.getEmail(),
+                signUpRequest.getPhoneNumber());
         logger.info(user.toString());
         return user;
     }

@@ -11,6 +11,24 @@ public class SignupRequest {
     private Set<String> role;
 
     private String password;
+    private String phoneNumber;
+
+
+    public SignupRequest(String username, String email, Set<String> role, String password,String phoneNumber) {
+        this.username = username;
+        this.email = email;
+        this.role = role;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 
     public String getUsername() {
         return username;

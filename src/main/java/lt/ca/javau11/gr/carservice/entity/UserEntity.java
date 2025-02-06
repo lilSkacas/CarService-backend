@@ -54,11 +54,12 @@ public class UserEntity {
         this.phoneNumber = phoneNumber;
     }
 
-    public UserEntity(String username, String password, String email) {
+    public UserEntity(String username, String password, String email, String phoneNumber) {
 
         this.username = username;
         this.password = password;
         this.email = email;
+        this.phoneNumber = phoneNumber;
     }
 
     public Set<RoleEntity> getRoles() {
