@@ -60,6 +60,7 @@ public class UserEntity {
         this.password = password;
         this.email = email;
         this.phoneNumber = phoneNumber;
+
     }
 
     public Set<RoleEntity> getRoles() {

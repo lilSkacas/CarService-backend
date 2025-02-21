@@ -1,6 +1,8 @@
 package lt.ca.javau11.gr.carservice.controller;
 
 import lt.ca.javau11.gr.carservice.dto.UserDto;
+import lt.ca.javau11.gr.carservice.entity.UserEntity;
+import lt.ca.javau11.gr.carservice.repository.UserRepository;
 import lt.ca.javau11.gr.carservice.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,10 +12,11 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 public class UserController {
 
     private final UserService userService;
+    private  UserRepository userRepository;
 
     public  UserController(UserService userService) {
                 this.userService = userService;
@@ -55,4 +58,16 @@ public class UserController {
         userService.deleteUser(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+//    @PostMapping("/carservice/user/login")
+//    public String loginUser(@RequestBody UserEntity loginUser) {
+//        return userService.loginUser(loginUser.getUsername(), loginUser.getPassword());
+//    }
+
+
 }
+
+
+
+
+

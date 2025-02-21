@@ -1,5 +1,6 @@
 package lt.ca.javau11.gr.carservice.controller;
 
+import lt.ca.javau11.gr.carservice.entity.UserEntity;
 import lt.ca.javau11.gr.carservice.request.LoginRequest;
 import lt.ca.javau11.gr.carservice.request.SignupRequest;
 import lt.ca.javau11.gr.carservice.response.JwtResponse;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 
 
-@CrossOrigin
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 @RestController
 public class AuthController {
 
@@ -42,11 +43,16 @@ public class AuthController {
 
         try {
             MessageResponse response = authService.registerUser(signUpRequest);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok("User registered successfuly");
         } catch (ResponseStatusException e) {
 
             return ResponseEntity.status(e.getStatusCode())
                     .body(new MessageResponse(e.getReason()));
         }
+    }
+
+    @PostMapping("/carservice/auth/reset-password")
+    public String resetUserPassword(@RequestBody UserEntity resetRequest) {
+        return authService.resetUserPassword(resetRequest.getEmail());
     }
 }

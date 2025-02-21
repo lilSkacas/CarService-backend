@@ -145,5 +145,3 @@ public class UserDto implements UserDetails {
                 '}';
     }
 }
-
-

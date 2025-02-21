@@ -5,6 +5,7 @@ import lt.ca.javau11.gr.carservice.entity.UserEntity;
 import lt.ca.javau11.gr.carservice.repository.UserRepository;
 import lt.ca.javau11.gr.carservice.util.UserMapper;
 
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,7 +25,7 @@ public class UserService implements UserDetailsService  {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-
+    private BCryptPasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
@@ -32,11 +34,11 @@ public class UserService implements UserDetailsService  {
 
 
     public UserDto createUser(UserDto userDto) {
+        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         UserEntity userEntityBeforeSave = userMapper.toUserEntity(userDto);
-
         UserEntity userEntityAfterSave = userRepository.save(userEntityBeforeSave);
-
         return userMapper.toUserDto(userEntityAfterSave);
+
     }
 
     public List<UserDto> getAllUsers(){
@@ -82,5 +84,13 @@ public class UserService implements UserDetailsService  {
         logger.info("Loaded :"+user.toString());
         return userMapper.toUserDto(user);
     }
-
 }
+
+
+
+
+
+
+
+
+

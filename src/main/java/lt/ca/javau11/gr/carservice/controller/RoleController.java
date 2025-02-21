@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 public class RoleController {
 
     @GetMapping("/carservice/get/mod")
