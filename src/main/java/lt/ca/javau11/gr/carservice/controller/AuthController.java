@@ -51,7 +51,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/carservice/auth/reset-password")
+    @PostMapping("/carservice/user/resetPassword")
     public String resetUserPassword(@RequestBody UserEntity resetRequest) {
         return authService.resetUserPassword(resetRequest.getEmail());
     }

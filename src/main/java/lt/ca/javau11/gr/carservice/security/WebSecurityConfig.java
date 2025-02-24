@@ -36,10 +36,8 @@ public class WebSecurityConfig {
     @Bean
     DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
-
         return authProvider;
     }
 
@@ -57,21 +55,28 @@ public class WebSecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(HttpMethod.GET,"/carservice/auth/**").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/carservice/user/**").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/carservice/client/**").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/carservice/vehicle/**").permitAll()
-                                .requestMatchers(HttpMethod.DELETE, "/carservice/user/**").authenticated()
-                                .anyRequest().permitAll()
+                        // Public routes
+                        .requestMatchers("/carservice/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/carservice/vehicle/**").permitAll()  // Allow GET requests for vehicles
+
+                        // Authenticated routes
+                        .requestMatchers(HttpMethod.POST,"/carservice/vehicle/**").authenticated()  // Requires authentication for POST/PUT/DELETE requests for vehicles
+
+                        // Role-based access control for other controllers
+                        .requestMatchers("/carservice/maintenance/**").hasRole("ADMIN") // Only allow ADMIN role for maintenance
+                        .requestMatchers("/carservice/role/**").hasRole("ADMIN") // Only allow ADMIN role for role management
+                        .requestMatchers("/carservice/user/**").hasAnyRole("ADMIN", "USER") // Allow ADMIN or USER roles for user-related routes
+
+                        // Default: Require authentication for all other routes
+                        .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
+        // Add JWT authentication filter
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
 }
-

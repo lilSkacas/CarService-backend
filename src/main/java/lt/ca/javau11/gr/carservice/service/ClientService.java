@@ -2,11 +2,11 @@ package lt.ca.javau11.gr.carservice.service;
 
 import lt.ca.javau11.gr.carservice.dto.ClientDto;
 import lt.ca.javau11.gr.carservice.entity.ClientEntity;
+import lt.ca.javau11.gr.carservice.entity.UserEntity;
+import lt.ca.javau11.gr.carservice.exception.ResourceNotFoundException;
 import lt.ca.javau11.gr.carservice.repository.ClientRepository;
 import lt.ca.javau11.gr.carservice.repository.UserRepository;
 import lt.ca.javau11.gr.carservice.util.ClientMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,61 +16,78 @@ import java.util.Optional;
 public class ClientService {
 
     private final ClientRepository clientRepository;
+    private final UserRepository userRepository;
     private final ClientMapper clientMapper;
 
-    private static final Logger logger = LoggerFactory.getLogger(ClientService.class);
-
-
-    public ClientService(ClientRepository clientRepository, ClientMapper clientMapper) {
+    public ClientService(ClientRepository clientRepository, UserRepository userRepository, ClientMapper clientMapper) {
         this.clientRepository = clientRepository;
+        this.userRepository = userRepository;
         this.clientMapper = clientMapper;
     }
 
-    public ClientDto createClient(ClientDto cDto){
-
-        ClientEntity clientEntityBeforeSave = clientMapper.toClientEntity(cDto);
-        ClientEntity clientEntityAfterSave = clientRepository.save(clientEntityBeforeSave);
-
-        return clientMapper.toClientDto(clientEntityAfterSave);
-
-    }
-
-    public List<ClientDto> getAllClients(){
-
-        List<ClientEntity> clients = clientRepository.findAll();
-
-        return clients.stream()
+    public List<ClientDto> getAllClients() {
+        return clientRepository.findAll().stream()
                 .map(clientMapper::toClientDto)
                 .toList();
-
     }
 
-    public Optional<ClientDto> getClientById (Long id){
-        Optional<ClientEntity> client = clientRepository.findById(id);
-
-        return client.map(clientMapper::toClientDto);
-
+    public List<ClientDto> getClientsByUser(Long userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        
+        return clientRepository.findByUser(user).stream()
+                .map(clientMapper::toClientDto)
+                .toList();
     }
 
-    public Optional<ClientDto> updateClient(Long id, ClientDto cDto) {
+    public Optional<ClientDto> getClientById(Long id) {
+        return clientRepository.findById(id)
+                .map(clientMapper::toClientDto);
+    }
 
-        if (clientRepository.existsById(id)) {
-            ClientEntity clientEntityBeforeSave = clientMapper.toClientEntity(cDto);
-            clientEntityBeforeSave.setId(id);
+    public ClientDto createClient(ClientDto clientDto) {
+        UserEntity user = userRepository.findById(clientDto.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + clientDto.getUserId()));
 
-            ClientEntity clientEntityAfterSave = clientRepository.save(clientEntityBeforeSave);
-            return Optional.of(clientMapper.toClientDto(clientEntityAfterSave));
+        // Check if email or phone already exists
+        if (clientRepository.existsByEmail(clientDto.getEmail())) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+        if (clientRepository.existsByPhoneNumber(clientDto.getPhoneNumber())) {
+            throw new IllegalArgumentException("Phone number already exists");
+        }
 
-        } else {
+        ClientEntity client = clientMapper.toClientEntity(clientDto, user);
+        return clientMapper.toClientDto(clientRepository.save(client));
+    }
+
+    public Optional<ClientDto> updateClient(Long id, ClientDto clientDto) {
+        if (!clientRepository.existsById(id)) {
             return Optional.empty();
         }
+
+        UserEntity user = userRepository.findById(clientDto.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + clientDto.getUserId()));
+
+        // Check if email or phone already exists for other clients
+        Optional<ClientEntity> existingByEmail = clientRepository.findByEmail(clientDto.getEmail());
+        if (existingByEmail.isPresent() && !existingByEmail.get().getId().equals(id)) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+
+        Optional<ClientEntity> existingByPhone = clientRepository.findByPhoneNumber(clientDto.getPhoneNumber());
+        if (existingByPhone.isPresent() && !existingByPhone.get().getId().equals(id)) {
+            throw new IllegalArgumentException("Phone number already exists");
+        }
+
+        ClientEntity client = clientMapper.toClientEntity(clientDto, user);
+        client.setId(id);
+        return Optional.of(clientMapper.toClientDto(clientRepository.save(client)));
     }
 
     public void deleteClient(Long id) {
-
-        clientRepository.deleteById(id);
-
+        if (clientRepository.existsById(id)) {
+            clientRepository.deleteById(id);
+        }
     }
 }
-
-

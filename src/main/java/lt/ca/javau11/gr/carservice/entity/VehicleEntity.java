@@ -1,130 +1,56 @@
 package lt.ca.javau11.gr.carservice.entity;
 
-
 import jakarta.persistence.*;
+import lombok.*;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
+@Table(name = "vehicle")
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class VehicleEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String licensePlate;
+
+    @Column(nullable = false)
     private String make;
+
+    @Column(nullable = false)
     private String model;
+
+    @Column(nullable = false)
     private Integer year;
+
+    @Column(nullable = false)
     private Double engine;
+
+    @Column(nullable = false)
     private String fuel;
+
+    @Column(nullable = false)
     private String transmission;
+
+    @Column(nullable = false)
     private String wheelDrive;
+
+    @Column(nullable = false)
     private String body;
 
-    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<MaintenanceEntity> maintenance;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id", nullable = false)
+    private ClientEntity client;
 
-
-    public VehicleEntity() {
-    }
-
-    public VehicleEntity(Long id, String licensePlate, String make, String model, Integer year, Double engine, String fuel, String transmission, String wheelDrive, String body) {
-        this.id = id;
-        this.licensePlate = licensePlate;
-        this.make = make;
-        this.model = model;
-        this.year = year;
-        this.engine = engine;
-        this.fuel = fuel;
-        this.transmission = transmission;
-        this.wheelDrive = wheelDrive;
-        this.body = body;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getLicensePlate() {
-        return licensePlate;
-    }
-
-    public void setLicensePlate(String licensePlate) {
-        this.licensePlate = licensePlate;
-    }
-
-    public String getMake() {
-        return make;
-    }
-
-    public void setMake(String make) {
-        this.make = make;
-    }
-
-    public String getModel() {
-        return model;
-    }
-
-    public void setModel(String model) {
-        this.model = model;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
-    public Double getEngine() {
-        return engine;
-    }
-
-    public void setEngine(Double engine) {
-        this.engine = engine;
-    }
-
-    public String getFuel() {
-        return fuel;
-    }
-
-    public void setFuel(String fuel) {
-        this.fuel = fuel;
-    }
-
-    public String getTransmission() {
-        return transmission;
-    }
-
-    public void setTransmission(String transmission) {
-        this.transmission = transmission;
-    }
-
-    public String getWheelDrive() {
-        return wheelDrive;
-    }
-
-    public void setWheelDrive(String wheelDrive) {
-        this.wheelDrive = wheelDrive;
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
-    }
-
-
+    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<MaintenanceEntity> maintenanceRecords = new HashSet<>();
 }
-
-
-
-

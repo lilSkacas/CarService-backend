@@ -2,12 +2,16 @@ package lt.ca.javau11.gr.carservice.service;
 
 import lt.ca.javau11.gr.carservice.dto.MaintenanceDto;
 import lt.ca.javau11.gr.carservice.entity.MaintenanceEntity;
+import lt.ca.javau11.gr.carservice.entity.VehicleEntity;
+import lt.ca.javau11.gr.carservice.exception.ResourceNotFoundException;
 import lt.ca.javau11.gr.carservice.repository.MaintenanceRepository;
+import lt.ca.javau11.gr.carservice.repository.VehicleRepository;
 import lt.ca.javau11.gr.carservice.util.MaintenanceMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,23 +19,16 @@ import java.util.Optional;
 public class MaintenanceService {
 
     private final MaintenanceRepository maintenanceRepository;
+    private final VehicleRepository vehicleRepository;
     private final MaintenanceMapper maintenanceMapper;
     private static final Logger logger = LoggerFactory.getLogger(MaintenanceService.class);
 
-
-    public MaintenanceService(MaintenanceRepository serviceRepository, MaintenanceMapper maintenanceMapper) {
-        this.maintenanceRepository = serviceRepository;
+    public MaintenanceService(MaintenanceRepository maintenanceRepository,
+                              VehicleRepository vehicleRepository,
+                              MaintenanceMapper maintenanceMapper) {
+        this.maintenanceRepository = maintenanceRepository;
+        this.vehicleRepository = vehicleRepository;
         this.maintenanceMapper = maintenanceMapper;
-    }
-
-    public MaintenanceDto createMaintenance(MaintenanceDto mDto) {
-
-        MaintenanceEntity maintenanceEntityBeforeSave = maintenanceMapper.toMaintenanceEntity(mDto);
-
-        MaintenanceEntity maintenanceEntityAfterSave = maintenanceRepository.save(maintenanceEntityBeforeSave);
-
-        return maintenanceMapper.toMaintenanceDto(maintenanceEntityAfterSave);
-
     }
 
     public List<MaintenanceDto> getAllMaintenance() {
@@ -42,33 +39,53 @@ public class MaintenanceService {
                 .toList();
     }
 
+    public List<MaintenanceDto> getMaintenanceByVehicle(Long vehicleId) {
+        VehicleEntity vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with id: " + vehicleId));
+
+        return maintenanceRepository.findByVehicle(vehicle).stream()
+                .map(maintenanceMapper::toMaintenanceDto)
+                .toList();
+    }
+
+    public List<MaintenanceDto> getMaintenanceByVehicleAndDateRange(Long vehicleId, LocalDate startDate, LocalDate endDate) {
+        VehicleEntity vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with id: " + vehicleId));
+
+        return maintenanceRepository.findByVehicleAndDateBetween(vehicle, startDate, endDate).stream()
+                .map(maintenanceMapper::toMaintenanceDto)
+                .toList();
+    }
+
     public Optional<MaintenanceDto> getMaintenanceById(Long id) {
-        Optional<MaintenanceEntity> maintenance = maintenanceRepository.findById(id);
-
-        return maintenance.map(maintenanceMapper::toMaintenanceDto);
-
+        return maintenanceRepository.findById(id)
+                .map(maintenanceMapper::toMaintenanceDto);
     }
 
-    public Optional<MaintenanceDto> updateMaintenance (Long id, MaintenanceDto mDto){
+    public MaintenanceDto createMaintenance(MaintenanceDto maintenanceDto) {
+        VehicleEntity vehicle = vehicleRepository.findById(maintenanceDto.getVehicleId())
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with id: " + maintenanceDto.getVehicleId()));
 
+        MaintenanceEntity maintenance = maintenanceMapper.toMaintenanceEntity(maintenanceDto, vehicle);
+        return maintenanceMapper.toMaintenanceDto(maintenanceRepository.save(maintenance));
+    }
+
+    public Optional<MaintenanceDto> updateMaintenance(Long id, MaintenanceDto maintenanceDto) {
+        if (!maintenanceRepository.existsById(id)) {
+            return Optional.empty();
+        }
+
+        VehicleEntity vehicle = vehicleRepository.findById(maintenanceDto.getVehicleId())
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with id: " + maintenanceDto.getVehicleId()));
+
+        MaintenanceEntity maintenance = maintenanceMapper.toMaintenanceEntity(maintenanceDto, vehicle);
+        maintenance.setId(id);
+        return Optional.of(maintenanceMapper.toMaintenanceDto(maintenanceRepository.save(maintenance)));
+    }
+
+    public void deleteMaintenance(Long id) {
         if (maintenanceRepository.existsById(id)) {
-                MaintenanceEntity maintenanceEntityBeforeSave = maintenanceMapper.toMaintenanceEntity(mDto);
-                maintenanceEntityBeforeSave.setId(id);
-
-
-                MaintenanceEntity maintenanceEntityAfterSave = maintenanceRepository.save(maintenanceEntityBeforeSave);
-                return Optional.of(maintenanceMapper.toMaintenanceDto(maintenanceEntityAfterSave));
-
-         } else {
-                return Optional.empty();
-            }
-        }
-
-        public void deleteMaintenance (Long id){
-
             maintenanceRepository.deleteById(id);
-
         }
     }
-
-
+}

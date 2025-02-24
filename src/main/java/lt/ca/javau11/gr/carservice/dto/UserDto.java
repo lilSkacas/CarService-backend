@@ -46,13 +46,10 @@ public class UserDto implements UserDetails {
         this.roles = roles;
     }
 
-
-
-
     public UserDto(String username, String password, String email, String phoneNumber) {
         this.username = username;
-        this.email = email;
         this.password = password;
+        this.email = email;
         this.phoneNumber = phoneNumber;
     }
 
@@ -64,6 +61,7 @@ public class UserDto implements UserDetails {
         this.id = id;
     }
 
+    @Override
     public String getUsername() {
         return username;
     }
@@ -80,20 +78,21 @@ public class UserDto implements UserDetails {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getPhoneNumber() {
         return phoneNumber;
     }
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override
@@ -140,8 +139,16 @@ public class UserDto implements UserDetails {
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
-                ", roles=" + roles +
+                ", phoneNumber='" + phoneNumber + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    public Set<RoleEntity> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<RoleEntity> roles) {
+        this.roles = roles;
     }
 }

@@ -14,7 +14,7 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/carservice/**")  // Apply CORS only to API routes
-                        .allowedOrigins("http://localhost:5173") // Allow requests from frontend
+                        .allowedOrigins("http://localhost:5174") // Allow requests from frontend
                         .allowedMethods("GET", "POST", "PUT", "DELETE") // Allowed HTTP methods
                         .allowedHeaders("*") // Allow all headers
                         .allowCredentials(true); // Allow cookies/authentication

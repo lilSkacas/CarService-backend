@@ -4,6 +4,7 @@ import lt.ca.javau11.gr.carservice.dto.UserDto;
 import lt.ca.javau11.gr.carservice.entity.RoleEntity;
 import lt.ca.javau11.gr.carservice.entity.UserEntity;
 import lt.ca.javau11.gr.carservice.enums.ERole;
+import lt.ca.javau11.gr.carservice.exception.UserNotFoundException;
 import lt.ca.javau11.gr.carservice.repository.RoleRepository;
 import lt.ca.javau11.gr.carservice.repository.UserRepository;
 import lt.ca.javau11.gr.carservice.request.LoginRequest;
@@ -24,7 +25,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -43,12 +43,12 @@ public class AuthService {
     private final JwtUtils jwtUtils;
 
     @Autowired
-    public AuthService (
-                        AuthenticationManager authenticationManager,
-                        UserRepository userRepository,
-                        RoleRepository roleRepository,
-                        PasswordEncoder encoder,
-                        JwtUtils jwtUtils) {
+    public AuthService(
+            AuthenticationManager authenticationManager,
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            PasswordEncoder encoder,
+            JwtUtils jwtUtils) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -58,7 +58,6 @@ public class AuthService {
 
         logger.info("JwtUtils injected: " + (jwtUtils != null));
     }
-
 
 
     public JwtResponse authenticateUser(LoginRequest loginRequest) {
@@ -97,7 +96,6 @@ public class AuthService {
     }
 
 
-
     private UserEntity createNewUser(SignupRequest signUpRequest) {
         UserEntity user = new UserEntity(
                 signUpRequest.getUsername(),
@@ -107,7 +105,6 @@ public class AuthService {
         logger.info(user.toString());
         return user;
     }
-
 
 
     private Set<RoleEntity> getInitialRoles(SignupRequest signUpRequest) {
@@ -129,7 +126,6 @@ public class AuthService {
     }
 
 
-
     private void checkUserExists(SignupRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error: Username is already in use!");
@@ -146,5 +142,23 @@ public class AuthService {
             return "Password reset link sent to email: " + email;
         }
         return "Email not found!";
+    }
+
+    public UserEntity getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String username;
+
+        if (authentication.getPrincipal() instanceof UserDto userDetails) {
+            username = userDetails.getUsername();
+        } else if (authentication.getPrincipal() instanceof String) {
+            username = (String) authentication.getPrincipal();
+            logger.info("Authentication Principal: " + authentication.getPrincipal());
+        } else {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unknown authentication principal type");
+        }
+
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
     }
 }

@@ -1,95 +1,36 @@
 package lt.ca.javau11.gr.carservice.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
+@Table(name = "maintenance")
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MaintenanceEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private LocalDate date;
+
+    @Column(nullable = false, length = 1000)
     private String description;
+
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-
-    @ManyToOne
-    @JoinColumn(name = "vehicle_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vehicle_id", nullable = false)
     private VehicleEntity vehicle;
-
-    @ManyToOne
-    @JoinColumn(name = "client_id", referencedColumnName = "id")
-    private ClientEntity client;
-
-    public MaintenanceEntity() {}
-
-    public MaintenanceEntity(Long id, LocalDate date, String description, BigDecimal price, VehicleEntity vehicle, ClientEntity client) {
-        this.id = id;
-        this.date = date;
-        this.description = description;
-        this.price = price;
-        this.vehicle = vehicle;
-        this.client = client;
-    }
-
-    public MaintenanceEntity(Long id, LocalDate date, String description, BigDecimal price) {
-        this.id = id;
-        this.date = date;
-        this.description = description;
-        this.price = price;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public VehicleEntity getVehicle() {
-        return vehicle;
-    }
-
-    public void setVehicle(VehicleEntity vehicle) {
-        this.vehicle = vehicle;
-    }
-
-    public ClientEntity getClient() {
-        return client;
-    }
-
-    public void setClient(ClientEntity client) {
-        this.client = client;
-    }
 
     @Override
     public String toString() {
@@ -99,8 +40,6 @@ public class MaintenanceEntity {
                 ", description='" + description + '\'' +
                 ", price=" + price +
                 ", vehicle=" + vehicle +
-                ", client=" + client +
                 '}';
     }
 }
-

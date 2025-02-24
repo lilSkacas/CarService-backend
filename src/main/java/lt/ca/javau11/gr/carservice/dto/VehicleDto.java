@@ -12,13 +12,15 @@ public class VehicleDto {
     private String transmission;
     private String wheelDrive;
     private String body;
+    private Long clientId;
 
     public VehicleDto() {}
 
     public VehicleDto(Long id,
                       String licensePlate, String make, String model,
                       Integer year, Double engine, String fuel,
-                      String transmission, String wheelDrive, String body) {
+                      String transmission, String wheelDrive, String body,
+                      Long clientId) {
         this.id = id;
         this.licensePlate = licensePlate;
         this.make = make;
@@ -29,6 +31,7 @@ public class VehicleDto {
         this.transmission = transmission;
         this.wheelDrive = wheelDrive;
         this.body = body;
+        this.clientId = clientId;
     }
 
     public Long getId() {
@@ -71,12 +74,12 @@ public class VehicleDto {
         this.year = year;
     }
 
-    public String getTransmission() {
-        return transmission;
+    public Double getEngine() {
+        return engine;
     }
 
-    public void setTransmission(String transmission) {
-        this.transmission = transmission;
+    public void setEngine(Double engine) {
+        this.engine = engine;
     }
 
     public String getFuel() {
@@ -87,12 +90,12 @@ public class VehicleDto {
         this.fuel = fuel;
     }
 
-    public Double getEngine() {
-        return engine;
+    public String getTransmission() {
+        return transmission;
     }
 
-    public void setEngine(Double engine) {
-        this.engine = engine;
+    public void setTransmission(String transmission) {
+        this.transmission = transmission;
     }
 
     public String getWheelDrive() {
@@ -111,6 +114,14 @@ public class VehicleDto {
         this.body = body;
     }
 
+    public Long getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(Long clientId) {
+        this.clientId = clientId;
+    }
+
     @Override
     public String toString() {
         return "VehicleDto{" +
@@ -124,6 +135,7 @@ public class VehicleDto {
                 ", transmission='" + transmission + '\'' +
                 ", wheelDrive='" + wheelDrive + '\'' +
                 ", body='" + body + '\'' +
+                ", clientId=" + clientId +
                 '}';
     }
 }

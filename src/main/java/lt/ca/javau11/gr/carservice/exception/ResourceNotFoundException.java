@@ -2,12 +2,12 @@ package lt.ca.javau11.gr.carservice.exception;
 
 import java.io.Serial;
 
-public class UserNotFoundException extends RuntimeException {
+public class ResourceNotFoundException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = 1L;
 
 
-    public UserNotFoundException(String message) {
+    public ResourceNotFoundException(String message) {
                 super(message);
     }
 
